@@ -22,7 +22,7 @@ export default function DetailPage({ navigate, selectedId }) {
 
   const handleAdd = () => {
     addToCart(kit.id);
-    navigate("/cart");
+//    navigate("/cart");
   };
 
 

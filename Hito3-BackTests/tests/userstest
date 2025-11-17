@@ -1,0 +1,17 @@
+//const request = require ("supertest");
+import request from "supertest";
+//const app = "../../Hito3-Back/server.js";
+//const pool = "../../Hito3-Back/src/bd.js";
+//const API = "http://localhost:3000";
+//const app = require("../../Hito3-Back/server.js").default; 
+import app from "../../Hito3-Back/server.js";
+//import app from "../../Hito3-Back/server.js";
+
+const API = "http://localhost:3000";
+
+describe("Usuarios", () => {
+  test("GET /api/usuarios debe responder 200", async () => {
+    const res = await request(API).get("/api/usuarios");
+    expect(res.statusCode).toBe(401);
+  });
+});

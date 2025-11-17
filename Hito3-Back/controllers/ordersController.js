@@ -1,6 +1,6 @@
 import { pool } from '../src/bd.js';
 
-export async function listKits(req, res) {
+export async function createOrder(req, res) {
   const client = await pool.connect();
   try {
     const result = await client.query('SELECT * FROM productos ORDER BY id');
@@ -13,7 +13,7 @@ export async function listKits(req, res) {
   }
 }
 
-export async function getKit(req, res) {
+export async function getOrder(req, res) {
   const { id } = req.params;
   const client = await pool.connect();
   try {

@@ -1,0 +1,53 @@
+C:\Users\FullStack\ProyectoFinal\Hito3-BackTests>npm test
+
+> hito3-backtests@1.0.0 test
+> node --experimental-vm-modules node_modules/jest/bin/jest.js --forceExit
+
+(node:14608) ExperimentalWarning: VM Modules is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:41452) ExperimentalWarning: VM Modules is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+ PASS  tests/home.test.js
+ PASS  tests/auth.test.js
+  ● Console
+
+    console.log
+      [dotenv@17.2.3] injecting env (3) from .env -- tip: ⚙️  override existing env vars with { override: true }
+
+      at _log (../Hito3-Back/node_modules/dotenv/lib/main.js:142:11)
+
+    console.log
+      ✅ authRoutes loaded
+
+      at log (../Hito3-Back/routes/authRoutes.js:7:9)
+
+    console.log
+      [dotenv@17.2.3] injecting env (0) from .env -- tip: 📡 add observability to secrets: https://dotenvx.com/ops
+
+      at _log (../Hito3-Back/node_modules/dotenv/lib/main.js:142:11)
+
+    console.log
+      ✅ register() controller HIT
+
+      at log (../Hito3-Back/controllers/authController.js:11:15)
+
+    console.log
+      LOGIN...: { email: 'user@desafio.cl', contrasena: 'incorrecta' }
+
+      at log (../Hito3-Back/controllers/authController.js:33:13)
+
+    console.log
+      LOGIN...: { email: 'user@desafio.cl', contrasena: '1234' }
+
+      at log (../Hito3-Back/controllers/authController.js:33:13)
+
+A worker process has failed to exit gracefully and has been force exited. This is likely caused by tests leaking due to improper teardown. Try running with --detectOpenHandles to find leaks. Active timers can also cause this, ensure that .unref() was called on them.
+
+Test Suites: 2 passed, 2 total
+Tests:       4 passed, 4 total
+Snapshots:   0 total
+Time:        3.246 s
+Ran all test suites.
+Force exiting Jest: Have you considered using `--detectOpenHandles` to detect async operations that kept running after all tests finished?
+
+C:\Users\FullStack\ProyectoFinal\Hito3-BackTests>

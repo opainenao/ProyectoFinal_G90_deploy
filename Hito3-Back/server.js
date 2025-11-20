@@ -7,9 +7,11 @@ import userRoutes from "./routes/userRoutes.js";
 
 dotenv.config();
 
+const FRONTEND_URL = process.env.FRONTEND_URL
+
 const app = express();
 app.use(cors({
-  origin: 'http://localhost:5174',   // hay que restringir antes de entregar
+  origin: FRONTEND_URL, //'http://localhost:5174',  
   credentials: true,
   methods: "GET,POST,PUT,DELETE",
   allowedHeaders: "Content-Type, Authorization"

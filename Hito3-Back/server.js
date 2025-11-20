@@ -10,6 +10,8 @@ import ordersRoutes from "./routes/orders.js";
 
 dotenv.config();
 
+const app = express();
+
 const FRONTEND_URL = process.env.FRONTEND_URL
 
 app.use(express.json());

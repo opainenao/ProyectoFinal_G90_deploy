@@ -1,15 +1,19 @@
 import express from "express";
 import cors from "cors";
-import dotenv from "dotenv";
+import dotenv from "dotenv"
 //import { pool } from "./src/bd.js";
 import authRoutes from "./routes/authRoutes.js";
 import userRoutes from "./routes/userRoutes.js";
+import cartsRoutes from "./routes/carts.js";
+import kitsRoutes from "./routes/kits.js";
+import ordersRoutes from "./routes/orders.js";
 
 dotenv.config();
 
 const FRONTEND_URL = process.env.FRONTEND_URL
 
-const app = express();
+app.use(express.json());
+
 app.use(cors({
   origin: FRONTEND_URL, //'http://localhost:5174',  
   credentials: true,
@@ -17,16 +21,17 @@ app.use(cors({
   allowedHeaders: "Content-Type, Authorization"
 }));
 
-app.use(express.json());
-
 app.use("/api/auth", authRoutes);
 app.use("/api/users", userRoutes);
+app.use("/api/carts", cartsRoutes);
+app.use("/api/kits", kitsRoutes);
+app.use("/api/orders", ordersRoutes);
 
 app.get("/", (req, res) => {
   res.send("API Online");
 });
 
-const PORT = process.env.PORT || 3000;
+//const PORT = process.env.PORT || 3000;
 //app.listen(PORT, () => console.log(`Servidor activo en http://localhost:${PORT}`));
 
 export default app;

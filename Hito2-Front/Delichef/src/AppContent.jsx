@@ -8,6 +8,10 @@ import ProfilePage from "./pages/ProfilePage";
 import DetailPage from "./pages/DetailPage";
 import Footer from "./components/Footer";
 import RegisterPage from "./pages/RegisterPage";
+import CheckoutConfirm from "./pages/CheckoutConfirmado";
+import NuevoKitPage from "./pages/NuevoKitPage";
+import AdminKitsPage from "./pages/AdminKitsPage";
+
 
 export default function AppContent() {
   const [route, setRoute] = useState("/");
@@ -35,7 +39,14 @@ export default function AppContent() {
         return <RegisterPage navigate={navigate} />;        
       case "/detalle":
         return <DetailPage navigate={navigate} selectedId={selectedId} />;
-      default:
+      case "/checkout":
+        return <CheckoutConfirm navigate={navigate} />;  
+      case "/admin/kits/new":
+        return <NuevoKitPage navigate={navigate} />;   
+      case "/admin/kits":
+        return <AdminKitsPage navigate={navigate} />;
+
+        default:
         return <HomePage navigate={navigate} />;
     }
   };

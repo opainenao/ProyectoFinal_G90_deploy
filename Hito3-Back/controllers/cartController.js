@@ -25,12 +25,13 @@ export async function addToCart(req, res) {
   try {
     // if exists, increment
     const exists = await client.query('SELECT id, cantidad FROM carrito_item WHERE id_user=$1 AND id_producto=$2', [userId, id_producto]);
+
     if (exists.rowCount > 0) {
-      const newQ = exists.rows[0].quantity + (quantity || 1);
-      await client.query('UPDATE carrito_item SET cantidad=$1 WHERE id=$2', [newQ, exists.rows[0].id]);
+      const newCantidad = exists.rows[0].cantidad + (cantidad || 1);
+      await client.query('UPDATE carrito_item SET cantidad=$1 WHERE id=$2', [newCantidad, exists.rows[0].id]);
       return res.json({ ok: true });
     }
-    await client.query('INSERT INTO carrito_item (id_user, id_producto, cantidad) VALUES ($1,$2,$3)', [userId, id_producto, quantity || 1]);
+    await client.query('INSERT INTO carrito_item (id_user, id_producto, cantidad) VALUES ($1,$2,$3)', [userId, id_producto, cantidad || 1]);
     res.status(201).json({ ok: true });
   } catch (e) {
     console.error(e);
@@ -41,10 +42,17 @@ export async function addToCart(req, res) {
 export async function updateCartItem(req, res) {
   const userId = req.user.id;
   const id = req.params.id;
-  const { quantity } = req.body;
+  const { cantidad } = req.body;
+
+  console.log("📥 updateCartItem body:", req.body);
+
+  if (!cantidad || isNaN(cantidad)) {
+    return res.status(400).json({ error: "Cantidad inválida" });
+  }
+
   const client = await pool.connect();
   try {
-    await client.query('UPDATE carrito_item SET cantidad=$1 WHERE id=$2 AND id_user=$3', [quantity, id, userId]);
+    await client.query('UPDATE carrito_item SET cantidad=$1 WHERE id=$2 AND id_user=$3', [cantidad, id, userId]);
     res.json({ ok: true });
   } catch (e) {
     console.error(e);

@@ -1,4 +1,6 @@
-export const KITS = [
+export const KITS = [];
+
+/*export const KITS = [
   {
     id: "k001",
     name: "Lasagna Gourmet de Pollo",
@@ -24,3 +26,4 @@ export const KITS = [
     img: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcR9bu1sOPXwyUhftCslK_XSADd4Ty9BXnhC0w&s",
   }
 ];
+*/

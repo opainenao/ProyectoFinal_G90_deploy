@@ -2,20 +2,28 @@ import React, { useState } from "react";
 import axios from "axios";
 
 export default function RegisterPage({ navigate }) {
-  const [nombre, setNombre] = useState("");
+  // 1. Estados sincronizados con los nombres de campo de la BD (username, contrasena)
+  const [username, setUsername] = useState(""); 
   const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
+  const [contrasena, setContrasena] = useState("");
+  // 2. Estados para los campos adicionales requeridos
+  const [fono, setFono] = useState(""); 
+  const [direccion, setDireccion] = useState("");
 
-  const API_URL = import.meta.env.VITE_API_URL;
+  // Usando la variable de entorno de Vite
+  const API_URL = "http://localhost:4000";//import.meta.env.VITE_API_URL;
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     
     try {
+      // 3. Envío de los CINCO campos requeridos por el controlador de backend
       const res = await axios.post(`${API_URL}/api/auth/register`, {
-        nombre,
+        username,   
         email,
-        password
+        fono,       
+        direccion,  
+        contrasena  
       });
 
       alert("Usuario registrado correctamente");
@@ -23,7 +31,9 @@ export default function RegisterPage({ navigate }) {
 
     } catch (error) {
       console.error(error);
-      alert("Error al registrar");
+      // Muestra un error más informativo si el backend lo proporciona
+      const errorMessage = error.response?.data?.error || "Error al registrar. Revisa la consola del backend.";
+      alert(errorMessage);
     }
   };
 
@@ -32,16 +42,19 @@ export default function RegisterPage({ navigate }) {
       <h2>Crear cuenta</h2>
 
       <form onSubmit={handleSubmit} className="mt-4" style={{ maxWidth: "420px" }}>
+        
+        {/* Campo USERNAME */}
         <div className="mb-3">
-          <label className="form-label">Nombre</label>
+          <label className="form-label">Nombre de Usuario</label>
           <input 
             className="form-control"
-            value={nombre}
-            onChange={(e) => setNombre(e.target.value)}
+            value={username}
+            onChange={(e) => setUsername(e.target.value)}
             required 
           />
         </div>
 
+        {/* Campo EMAIL */}
         <div className="mb-3">
           <label className="form-label">Email</label>
           <input
@@ -53,13 +66,36 @@ export default function RegisterPage({ navigate }) {
           />
         </div>
 
+        {/* Campo TELÉFONO (FONO) */}
+        <div className="mb-3">
+            <label className="form-label">Teléfono</label>
+            <input
+                type="text" 
+                className="form-control"
+                value={fono}
+                onChange={(e) => setFono(e.target.value)}
+            />
+        </div>
+
+        {/* Campo DIRECCIÓN */}
+        <div className="mb-3">
+            <label className="form-label">Dirección</label>
+            <input
+                type="text" 
+                className="form-control"
+                value={direccion}
+                onChange={(e) => setDireccion(e.target.value)}
+            />
+        </div>
+
+        {/* Campo CONTRASEÑA */}
         <div className="mb-3">
           <label className="form-label">Contraseña</label>
           <input
             type="password" 
             className="form-control"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
+            value={contrasena}
+            onChange={(e) => setContrasena(e.target.value)}
             required 
           />
         </div>

@@ -34,7 +34,7 @@ export async function login(req, res) {
     const { email, contrasena } = req.body;
 
     const result = await pool.query(
-      `SELECT * FROM usuarios WHERE email = $1`,
+      `SELECT id, username, email, fono, direccion, comuna,rol,contrasena FROM usuarios WHERE email = $1`,
       [email]
     );
 
@@ -53,9 +53,21 @@ export async function login(req, res) {
       { expiresIn: "1d" }
     );
 
-    res.json({ token });
+
+    res.json({
+      token,
+      user: {
+        id: user.id,
+        username: user.username,
+        email: user.email,
+        fono: user.fono,
+        direccion: user.direccion,
+        comuna: user.comuna,
+        rol: user.rol,
+      },
+    });
   } catch (e) {
-    console.error("LOGIN ERROR:", error);
+    console.error("LOGIN ERROR:", e);
     res.status(500).json({ error: "Error al iniciar sesión" });
   }
 }

@@ -1,29 +1,102 @@
-import React, { useContext, useState } from "react";
+import React, { useContext, useState, useEffect } from "react";
 import { AuthContext } from "../context/AuthProvider";
 import { MapPin, CreditCard } from "lucide-react";
 import { formatPrice } from "../utils/formatPrice";
+import axios from "axios";
+
 
 const ProfilePage = () => {
-  const { user } = useContext(AuthContext);
+  const { user, setUser } = useContext(AuthContext);
   const [activeTab, setActiveTab] = useState("address");
+  const [orders, setOrders] = useState([]);
+  //const [address, setAddress] = useState({
+  //  direccion: "Av. Mockingbird 123",
+  //  ciudad: "Santiago",
+  //  fono: "912345678",
+  //});
+
   const [address, setAddress] = useState({
-    street: "Av. Mockingbird 123",
-    city: "Santiago",
-    phone: "912345678",
+    direccion: "",
+    comuna: "",
+    fono: "",
   });
+
+  // Cuando el usuario cambia, rellenamos los campos
+  useEffect(() => {
+    if (!user) return;
+
+    setAddress({
+      direccion: user.direccion || "",
+      comuna: user.comuna || "",
+      fono: user.fono || "",
+    });
+  }, [user]);
 
   if (!user)
     return (
       <p className="text-center py-5">Debes iniciar sesión para ver tu perfil.</p>
     );
 
-  const uid = user.uid || "N/A";
 
-  const handleSave = (e) => {
-    e.preventDefault();
-    console.log("Guardando datos:", address);
-    alert("Datos guardados (mock)");
-  };
+const handleSave = async (e) => {
+  e.preventDefault();
+
+  try {
+    const API_URL = import.meta.env.VITE_API_URL;
+
+      await axios.put(
+        `${API_URL}/api/users/${user.username}`,
+        {
+          fono: address.fono,
+          direccion: address.direccion,
+          comuna: address.comuna,
+        },
+        {
+          headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
+          withCredentials: true,
+        }
+      );
+
+      // Actualizar datos en el contexto Auth
+      setUser({
+        ...user,
+        fono: address.fono,
+        direccion: address.direccion,
+        comuna: address.comuna,
+      });
+
+      alert("Datos actualizados correctamente");
+
+  } catch (error) {
+    console.error("Error actualizando usuario:", error);
+    alert("Hubo un error al actualizar los datos");
+  }
+};
+
+
+
+
+  useEffect(() => {
+    if (!user) return; 
+    
+    const fetchOrders = async () => {
+      try {
+        const API_URL = import.meta.env.VITE_API_URL;
+
+        const response = await axios.get(
+          `${API_URL}/api/orders/user/${user.id}`,
+          { headers: { Authorization: `Bearer ${localStorage.getItem("token")}` } }
+        );
+
+        setOrders(response.data);
+      } catch (e) {
+        console.error("Error cargando órdenes:", e);
+      }
+    };
+
+    fetchOrders();
+  }, [user]);
+
 
   const renderContent = () => {
     switch (activeTab) {
@@ -33,7 +106,7 @@ const ProfilePage = () => {
             <h4>Direcciones y Contacto</h4>
 
             <div className="alert alert-secondary small">
-              Tu ID de Usuario: <strong>{uid}</strong>
+              Tu ID de Usuario: <strong>{user.username}</strong>
             </div>
 
             <label className="form-label">Teléfono</label>
@@ -41,9 +114,9 @@ const ProfilePage = () => {
               type="text"
               required
               className="form-control mb-3"
-              value={address.phone}
+              value={address.fono}
               onChange={(e) =>
-                setAddress({ ...address, phone: e.target.value })
+                setAddress({ ...address, fono: e.target.value })
               }
             />
 
@@ -52,9 +125,9 @@ const ProfilePage = () => {
               type="text"
               required
               className="form-control mb-3"
-              value={address.street}
+              value={address.direccion}
               onChange={(e) =>
-                setAddress({ ...address, street: e.target.value })
+                setAddress({ ...address, direccion: e.target.value })
               }
             />
 
@@ -63,9 +136,9 @@ const ProfilePage = () => {
               type="text"
               required
               className="form-control mb-3"
-              value={address.city}
+              value={address.comuna}
               onChange={(e) =>
-                setAddress({ ...address, city: e.target.value })
+                setAddress({ ...address, comuna: e.target.value })
               }
             />
 
@@ -86,39 +159,69 @@ const ProfilePage = () => {
           </form>
         );
 
-      case "orders":
-        return (
-          <div>
-            <h4>Órdenes Pendientes</h4>
-            <p className="text-muted small">
-              Solo mostramos pedidos activos o recién entregados.
-            </p>
+//     case "orders":
+//       return (
+//         <div>
+//           <h4>Órdenes Pendientes</h4>
+//           <p className="text-muted small">
+//             Solo mostramos pedidos activos o recién entregados.
+//           </p>
+//
+//           <div className="alert alert-warning d-flex justify-content-between">
+//             <div>
+//               <strong>Orden #00123:</strong> {formatPrice(45000)}
+//               <p className="small">En camino – Entrega estimada: Mañana.</p>
+//             </div>
+//             <button className="btn btn-sm btn-outline-warning">
+//               Ver Detalle
+//             </button>
+//           </div>
+//
+//           <div className="alert alert-success d-flex justify-content-between">
+//             <div>
+//               <strong>Orden #00122:</strong> {formatPrice(32000)}
+//               <p className="small">Entregada – Hace 2 días.</p>
+//             </div>
+//             <button className="btn btn-sm btn-outline-success">
+//               Ver Detalle
+//             </button>
+//           </div>
+//
+//           <p className="text-muted small">
+//             El historial completo está archivado.
+//           </p>
+//         </div>
+//       );
 
-            <div className="alert alert-warning d-flex justify-content-between">
-              <div>
-                <strong>Orden #00123:</strong> {formatPrice(45000)}
-                <p className="small">En camino – Entrega estimada: Mañana.</p>
-              </div>
-              <button className="btn btn-sm btn-outline-warning">
-                Ver Detalle
-              </button>
+        case "orders":
+          return (
+            <div>
+              <h4>Mis Órdenes</h4>
+
+              {orders.length === 0 && (
+                <p className="text-muted">No tienes órdenes registradas.</p>
+              )}
+
+              {orders.map((order) => (
+                <div key={order.id} className="alert alert-secondary">
+                  <strong>Pedido #{order.id}</strong>
+                  <p className="small">
+                    Total: {formatPrice(order.monto_total)} <br />
+                    Estado: {order.estado} <br />
+                    Fecha: {new Date(order.fecha_creacion).toLocaleDateString()}
+                  </p>
+
+                  <ul className="small">
+                    {order.items.map((item) => (
+                      <li key={item.id}>
+                        Producto #{item.id_producto} — {item.cantidad}u — {formatPrice(item.precio)}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              ))}
             </div>
-
-            <div className="alert alert-success d-flex justify-content-between">
-              <div>
-                <strong>Orden #00122:</strong> {formatPrice(32000)}
-                <p className="small">Entregada – Hace 2 días.</p>
-              </div>
-              <button className="btn btn-sm btn-outline-success">
-                Ver Detalle
-              </button>
-            </div>
-
-            <p className="text-muted small">
-              El historial completo está archivado.
-            </p>
-          </div>
-        );
+          );
 
       default:
         return null;

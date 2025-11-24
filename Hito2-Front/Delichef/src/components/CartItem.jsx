@@ -1,6 +1,8 @@
-import React from "react";
-import { Minus, Plus, X } from "lucide-react";
+import React, { useContext } from "react";
+import { CartContext } from "../context/CartProvider";
 import { formatPrice } from "../utils/formatPrice";
+import { MinusCircle, PlusCircle, Trash2 } from "lucide-react";
+
 
 const CartItem = ({ item, kit, updateQuantity, removeFromCart }) => {
   return (
@@ -8,49 +10,38 @@ const CartItem = ({ item, kit, updateQuantity, removeFromCart }) => {
       <img
         src={kit.img}
         alt={kit.name}
-        className="rounded me-3"
-        style={{ width: "64px", height: "64px", objectFit: "cover" }}
-       // onError={(e) =>
-       //   (e.target.src =
-       //     "https://placehold.co/400x300/e5e7eb/6b7280?text=Kit")
-       // }
-        onError={(e) => (e.target.src = "https://placehold.co/400x300?text=No+Image")}
+        className="me-3"
+        style={{ width: "90px", height: "90px", objectFit: "cover", borderRadius: "8px" }}
       />
 
       <div className="flex-grow-1">
-        <h5 className="mb-1 fw-semibold">{kit.name}</h5>
-        <small className="text-muted">{formatPrice(kit.price)} c/u</small>
-      </div>
+        <h5 className="mb-1">{kit.name}</h5>
+        <p className="text-muted mb-2">{formatPrice(kit.price)}</p>
 
-      {/* cantidad */}
-      <div className="d-flex align-items-center me-3">
-        <button
-          className="btn btn-light btn-sm"
-          onClick={() => updateQuantity(kit.id, item.quantity - 1)}
-        >
-          <Minus size={16} />
-        </button>
+        <div className="d-flex align-items-center">
+          <button
+            className="btn btn-link p-0 me-2"
+            onClick={() => updateQuantity(item.itemId, item.quantity - 1)}
+          >
+            <MinusCircle size={22} />
+          </button>
 
-        <span className="mx-2 fw-medium">{item.quantity}</span>
+          <span className="px-3 fw-bold">{item.quantity}</span>
 
         <button
-          className="btn btn-light btn-sm"
-          onClick={() => updateQuantity(kit.id, item.quantity + 1)}
-        >
-          <Plus size={16} />
-        </button>
-      </div>
-
-      {/* Total */}
-      <div className="fw-bold w-100 text-end">
-        {formatPrice(kit.price * item.quantity)}
+            className="btn btn-link p-0 ms-2"
+            onClick={() => updateQuantity(item.itemId, item.quantity + 1)}
+          >
+            <PlusCircle size={22} />
+          </button>
+        </div>
       </div>
 
       <button
-        className="btn btn-link text-danger ms-3"
-        onClick={() => removeFromCart(kit.id)}
+        className="btn btn-link text-danger"
+        onClick={() => removeFromCart(item.itemId)}
       >
-        <X size={20} />
+        <Trash2 size={26} />
       </button>
     </div>
   );

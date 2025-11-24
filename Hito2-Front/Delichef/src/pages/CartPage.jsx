@@ -1,13 +1,19 @@
-import React, { useContext } from "react";
+import React, { useContext,useState,useEffect } from "react";
+import axios from "axios";
 import { CartContext } from "../context/CartProvider";
-import { KITS } from "../data/kits";
+//import { KITS } from "../data/kits";
 import { formatPrice } from "../utils/formatPrice";
 import CartItem from "../components/CartItem";
 import { ShoppingCart } from "lucide-react";
 
+const API_URL = import.meta.env.VITE_API_URL;
+
 const CartPage = ({ navigate }) => {
+  const [allKits, setAllKits] = useState([]); 
+  const [loading, setLoading] = useState(true);
+
   const {
-    cartItems,
+    cart,
     cartTotal,
     updateQuantity,
     removeFromCart,
@@ -15,12 +21,45 @@ const CartPage = ({ navigate }) => {
     cartCount,
   } = useContext(CartContext);
 
-  const cartDetails = Object.keys(cartItems)
-    .map((kitId) => ({
-      kit: KITS.find((k) => k.id === kitId),
-      quantity: cartItems[kitId],
-    }))
-    .filter((item) => item.kit);
+  useEffect(() => {
+    const fetchKits = async () => {
+      try {
+        const response = await axios.get(`${API_URL}/api/kits`);
+        // Mapeo necesario para sincronizar nombres de campo
+        const formattedKits = response.data.map(kit => ({
+            id: kit.id,
+            name: kit.nombre,
+            price: kit.precio,
+            description: kit.descripcion,
+            category: kit.categoria,
+            img: kit.imagen_kit // Mapeo de imagen_kit a img
+        }));
+        setAllKits(formattedKits);
+      } catch (err) {
+        console.error("Error al cargar kits para el carrito:", err);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchKits();
+  }, []);
+
+  //const cartDetails = Object.keys(cartItems)
+  //  .map((kitId) => ({
+  //    kit: allKits.find((k) => String(k.id) === kitId),
+  //    quantity: cartItems[kitId],
+  //  }))
+  //  .filter((item) => item.kit);
+
+  const cartDetails = cart.map((c) => ({
+    itemId: c.id,                // ID del item en tabla carrito_item
+    quantity: c.quantity,
+    kit: allKits.find((k) => k.id === c.productId)
+  })).filter((d) => d.kit);    
+
+  if (loading) {
+    return <main className="container py-5 text-center"><h2>Cargando detalles del carrito...</h2></main>;
+  }    
 
   return (
     <main className="container py-5">

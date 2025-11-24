@@ -1,17 +1,19 @@
 import { Router } from "express";
-import {register} from "../controllers/userController.js";
-import {getUsuarios,getUsuarioById,getPerfil,} from "../controllers/userController.js";
+//import {register} from "../controllers/userController.js";
+import {getUsuarios,getUsuarioById,getPerfil,updateUser } from "../controllers/userController.js";
 import { requireAuth } from "../middleware/authMiddleware.js";
 
 const router = Router();
 
-router.post("/register", register);
+//router.post("/register", register);
 
 //router.get("/", getUsuarios);
 router.get("/perfil", requireAuth, getPerfil);
 
 router.get("/", requireAuth, getUsuarios);
 router.get("/:id", requireAuth, getUsuarioById);
+
+router.put("/:id", requireAuth, updateUser);
 
 //router.get("/", requireAuth, async (req, res) => {
 //  return res.json({ ok: true, user: req.user });

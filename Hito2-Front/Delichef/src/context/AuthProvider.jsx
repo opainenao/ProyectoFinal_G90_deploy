@@ -97,27 +97,59 @@
 //};
 
 
-import React, { createContext, useState } from "react";
+import React, { createContext, useState,useEffect } from "react";
+import axios from "axios";
 
 export const AuthContext = createContext();
 
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
 
-  const login = (email, password) => {
+  // al recargar página
+  useEffect(() => {
+    const savedUser = localStorage.getItem("user");
+    if (savedUser) {
+      setUser(JSON.parse(savedUser));
+    }
+  }, []);
+
+  const login = async (email, password) => {
     // Mock login
-    setUser({
-      uid: "mock-uid-123",
-      email,
-    });
+    //setUser({
+    //  uid: "mock-uid-123",
+    //  email,
+    //});
+
+try {
+      const response = await axios.post(`${import.meta.env.VITE_API_URL}/api/auth/login`, {
+      //const response = await axios.post("http://localhost:4000/api/auth/login", {
+        email,
+        contrasena: password,
+      });
+
+      const { token, user } = response.data;
+
+      // estado
+      setUser(user);
+
+      // localStorage
+      localStorage.setItem("token", token);
+      //localStorage.setItem("user", JSON.stringify(user));
+
+    } catch (e) {
+      console.log("Error al iniciar sesión", e);
+      alert("Credenciales inválidas");
+    }
   };
 
   const logout = () => {
     setUser(null);
+    localStorage.removeItem("token");
+    localStorage.removeItem("user");
   };
 
   return (
-    <AuthContext.Provider value={{ user, login, logout }}>
+    <AuthContext.Provider value={{ user, setUser, login, logout }}>
       {children}
     </AuthContext.Provider>
   );

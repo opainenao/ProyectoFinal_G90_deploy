@@ -1,89 +1,72 @@
 //import { pool } from "../bd/index.js";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
-//import { pool } from "../src/bd.js";
+import { pool } from "../src/bd.js";
 
-export const login = async (req, res) => {
+
+
+export async function getPerfil(req, res) {
   try {
-    const { email, contrasena } = req.body;
+    const userId = req.user.id;
 
-    const result = await pool.query(
-      `SELECT * FROM usuarios WHERE email = $1`,
-      [email]
+    // Obtener  usuario
+    const user = await pool.query(
+      `SELECT id, username, email, fono, direccion, rol, fecha_creacion
+       FROM usuarios WHERE id = $1`,
+      [userId]
     );
 
-    const user = result.rows[0];
-    if (!user) return res.status(401).json({ error: "Credenciales inválidas" });
+    if (!user.rows.length)
+      return res.status(404).json({ error: "Usuario no encontrado" });
 
-    const isOk = await bcrypt.compare(contrasena, usuario.contrasena);
-    if (!isOk) return res.status(401).json({ error: "Credenciales inválidas" });
+    // historial de ordenes
+    const orders = await pool.query(
+      `SELECT * FROM pedidos WHERE user_id = $1 ORDER BY fecha_creacion DESC`,
+      [userId]
+    );
 
-    const token = jwt.sign(
-      { id: user.id, email: user.email },
-      process.env.JWT_SECRET,
-      { expiresIn: "1d" }
+    // items por orden
+    const items = await pool.query(
+      `SELECT pi.id_pedido, pi.id_producto, pi.cantidad, pi.precio, p.nombre
+       FROM pedidos_items pi
+       LEFT JOIN productos p ON p.id = pi.id_producto
+       WHERE pi.id_pedido IN (SELECT id FROM pedidos WHERE user_id = $1)`,
+      [userId]
     );
 
     res.json({
-      user: { id: user.id, username: user.username, email: user.email },
-      token,
+      user: user.rows[0],
+      orders: orders.rows,
+      orderItems: items.rows,
     });
-  } catch (error) {
-    console.error("LOGIN ERROR", error);
-    res.status(500).json({ error: "Error al iniciar sesión" });
+  } catch (e) {
+    console.error("GET PERFIL ERROR:", e);
+    res.status(500).json({ error: "Error al obtener perfil" });
   }
-};
-
-export const register = async (req, res) => {
-  try {
-    const { username, email, fono, direccion, contrasena } = req.body;
-
-    if (!username || !email || !contrasena) {
-      return res
-        .status(400)
-        .json({ error: "username, email y contrasena son obligatorios" });
-    }
-
-    const hashed = await bcrypt.hash(contrasena, 10);
-
-    const result = await pool.query(
-      `INSERT INTO usuarios (username, email, fono, direccion, contrasena)
-       VALUES ($1, $2, $3, $4, $5)
-       RETURNING id, username, email`,
-      [username, email, fono, direccion, hashed]
-    );
-
-    const user = result.rows[0];
-
-    const token = jwt.sign(
-      { id: user.id, email: user.email },
-      process.env.JWT_SECRET,
-      { expiresIn: "1d" }
-    );
-
-    res.status(201).json({ user, token });
-  } catch (error) {
-    console.error("REGISTER ERROR", error);
-    res.status(500).json({ error: "Error registrando usuario" });
-  }
-};
+}
 
 export async function getUsuarios(req, res) {
   try {
     const result = await pool.query(
-      "SELECT id, username, email, fono, direccion FROM usuarios"
+      `SELECT id, username, email, fono, direccion, rol, fecha_creacion
+       FROM usuarios ORDER BY id ASC`
     );
+
     res.json(result.rows);
   } catch (e) {
+    console.error("GET USUARIOS ERROR:", e);
     res.status(500).json({ error: "Error al obtener usuarios" });
   }
 }
 
+
 export async function getUsuarioById(req, res) {
   try {
     const { id } = req.params;
+
     const result = await pool.query(
-      "SELECT id, username, email, fono, direccion FROM usuarios WHERE id = $1",
+      `SELECT id, username, email, fono, direccion, rol, fecha_creacion
+       FROM usuarios WHERE id = $1`,
       [id]
     );
 
@@ -92,13 +75,33 @@ export async function getUsuarioById(req, res) {
 
     res.json(result.rows[0]);
   } catch (e) {
+    console.error("GET USUARIO BY ID ERROR:", e);
     res.status(500).json({ error: "Error al obtener usuario" });
   }
 }
 
-export async function getPerfil(req, res) {
-  res.json({
-    id: req.user.id,
-    email: req.user.email,
-  });
-}
+export const updateUser = async (req, res) => {
+  try {
+    const userId = req.params.id;
+    const { fono, direccion, comuna } = req.body;
+
+    const result = await pool.query(
+      `UPDATE usuarios
+       SET fono = $1,
+           direccion = $2,
+           comuna = $3
+       WHERE id = $4
+       RETURNING id, username, email, fono, direccion, comuna`,
+      [fono, direccion, comuna, userId]
+    );
+
+    if (result.rowCount === 0) {
+      return res.status(404).json({ message: "Usuario no encontrado" });
+    }
+
+    res.json({ message: "Usuario actualizado", user: result.rows[0] });
+  } catch (error) {
+    console.error("Error actualizando usuario:", error);
+    res.status(500).json({ message: "Error actualizando usuario" });
+  }
+};
